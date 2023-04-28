@@ -1,0 +1,25 @@
+.customPickersDay.is-between {
+  border-radius: 0;
+  background-color: #007aff;
+  color: #000;
+}
+
+.customPickersDay.is-first-day {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+}
+
+.customPickersDay.is-last-day {
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
+
+.customPickersDay.selected {
+  background-color: #007aff;
+  color: #fff;
+}
+
+.customPickersDay:hover,
+.customPickersDay:focus {
+  background-color: #6ec6ff;
+}

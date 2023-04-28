@@ -1,0 +1,12 @@
+.day {
+  display: flex;
+}
+
+.weekNumber {
+  margin-right: 8px;
+}
+
+.selected {
+  /* background-color: blue; */
+  color: white;
+}
