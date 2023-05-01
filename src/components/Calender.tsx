@@ -10,8 +10,6 @@ import Badge from "@mui/material/Badge";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers";
 import styles from "../styles/CustomPickersDay.module.css";
 import stylofcustomdate from "../styles/CustomDay.module.css";
-dayjs.extend(isBetweenPlugin);
-
 interface CustomPickerDayProps extends PickersDayProps<Dayjs> {
   dayIsBetween: boolean;
   isFirstDay: boolean;
@@ -82,6 +80,12 @@ function Day(props: PickersDayProps<Dayjs> & { selectedDay?: Dayjs | null }) {
 //   const week = Math.ceil((diff + startOfYear.day()) / 7);
 //   return week;
 // };
+const getWeekNumber = (date: Dayjs) => {
+  const startOfYear = date.startOf("year").startOf("week");
+  const diff = date.diff(startOfYear, "day");
+  const week = Math.ceil((diff + startOfYear.day()) / 7);
+  return week;
+};
 
 function CombinedDay(
   props: PickersDayProps<Dayjs> & {
@@ -90,20 +94,18 @@ function CombinedDay(
   }
 ) {
   const { highlightedDays = [], selectedDay, ...other } = props;
-  const getWeekNumber = (date: Dayjs) => {
-    const startOfYear = date.startOf("year").startOf("week");
-    const diff = date.diff(startOfYear, "day");
-    const week = Math.ceil((diff + startOfYear.day()) / 7);
-    return week;
-  };
+
   const isSelected =
     !props.outsideCurrentMonth &&
     (highlightedDays.indexOf(props.day.date()) > -1 ||
       (selectedDay && props.day.isSame(selectedDay, "day")));
   const weekNumber = getWeekNumber(props.day);
+
+  const isWeekStart = props.day.day() === 0;
+
   return (
     <div className={styles.day}>
-      <div className={styles.weekNumber}>{weekNumber}</div>
+      {isWeekStart && <div className={styles.weekNumber}> {weekNumber}</div>}
       <Badge
         key={props.day.toString()}
         overlap="circular"

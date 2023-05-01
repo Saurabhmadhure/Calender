@@ -3,7 +3,15 @@
 }
 
 .weekNumber {
-  margin-right: 8px;
+  font-family: "Roboto", "Helvetica", "Arial";
+  font-size: 0.75rem;
+
+  position: relative;
+  margin-right: 2px;
+  width: 35px;
+
+  background-color: transparent;
+  color: rgba(0, 0, 0, 0.87);
 }
 
 .selected {
