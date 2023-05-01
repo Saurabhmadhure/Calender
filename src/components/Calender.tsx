@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import dayjs, { Dayjs } from "dayjs";
 import isBetweenPlugin from "dayjs/plugin/isBetween";
-import { styled } from "@mui/material/styles";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
@@ -139,10 +138,10 @@ export default function CustomDay() {
 
     requestAbortController.current = controller;
   };
-  useEffect(() => {
-    fetchHighlightedDays(value);
-    return () => requestAbortController.current?.abort();
-  }, [value]);
+  // useEffect(() => {
+  //   fetchHighlightedDays(value);
+  //   return () => requestAbortController.current?.abort();
+  // }, [value]);
 
   const handleMonthChange = (date: Dayjs) => {
     if (requestAbortController.current) {
@@ -154,23 +153,29 @@ export default function CustomDay() {
   };
 
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DateCalendar
-        value={value}
-        onChange={(newValue) => setValue(newValue ? newValue : null)}
-        onMonthChange={handleMonthChange}
-        renderLoading={() => <DayCalendarSkeleton />}
-        slots={{
-          day: CombinedDay,
-        }}
-        views={["month", "day"]}
-        slotProps={{
-          day: {
-            highlightedDays,
-            selectedDay: value,
-          } as any,
-        }}
-      />
-    </LocalizationProvider>
+    <div>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+        <div className={styles.container}>
+          <div className={styles.columnHeader}>wk</div>
+          <DateCalendar<Dayjs>
+            value={value}
+            onChange={(newValue) => setValue(newValue ? newValue : null)}
+            onMonthChange={handleMonthChange}
+            renderLoading={() => <DayCalendarSkeleton />}
+            slots={{
+              day: CombinedDay,
+            }}
+            views={["month", "day"]}
+            slotProps={{
+              day: {
+                highlightedDays,
+                selectedDay: value,
+              } as any,
+            }}
+          />
+          {/* <DayCalendarSkeleton /> */}
+        </div>
+      </LocalizationProvider>
+    </div>
   );
 }

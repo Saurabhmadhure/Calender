@@ -1,20 +1,26 @@
 .day {
   display: flex;
+  align-items: center;
+  padding: 0px;
 }
 
 .weekNumber {
   font-family: "Roboto", "Helvetica", "Arial";
   font-size: 0.75rem;
+  /* position: absolute; */
+  position: relative;
 
+  top: 0px;
+  left: 30%;
+  transform: translateX(-60%);
   position: relative;
   margin-right: 2px;
   width: 35px;
+  margin-right: 2px;
 
-  background-color: transparent;
   color: rgba(0, 0, 0, 0.87);
 }
 
 .selected {
-  /* background-color: blue; */
   color: white;
 }
