@@ -5,16 +5,15 @@
 }
 
 .weekNumber {
-  font-family: "Roboto", "Helvetica", "Arial";
+  font-family: "Arial";
   font-size: 0.75rem;
-  /* position: absolute; */
   position: relative;
 
   top: 0px;
   left: 30%;
   transform: translateX(-60%);
   position: relative;
-  margin-right: 2px;
+  /* margin-right: 2px; */
   width: 35px;
   margin-right: 2px;
 

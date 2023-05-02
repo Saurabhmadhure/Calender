@@ -3,19 +3,15 @@ import dayjs, { Dayjs } from "dayjs";
 import isBetweenPlugin from "dayjs/plugin/isBetween";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { PickersDay, PickersDayProps } from "@mui/x-date-pickers/PickersDay";
 import Badge from "@mui/material/Badge";
-import { DayCalendarSkeleton } from "@mui/x-date-pickers";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+
 import styles from "../styles/CustomPickersDay.module.css";
 import stylofcustomdate from "../styles/CustomDay.module.css";
 import { Button } from "react-bootstrap";
-
-interface CustomPickerDayProps extends PickersDayProps<Dayjs> {
-  dayIsBetween: boolean;
-  isFirstDay: boolean;
-  isLastDay: boolean;
-}
+import CustomPickerDayProps from "../pages/param/CalenderParam";
+import { DayCalendarSkeleton } from "@mui/x-date-pickers";
 
 const CustomPickersDay = ({
   day,
@@ -33,7 +29,19 @@ const CustomPickersDay = ({
     selected ? stylofcustomdate.selected : "",
   ].join(" ");
 
-  return <PickersDay {...otherProps} className={className} day={day} />;
+  return (
+    <PickersDay
+      onDaySelect={function (day: unknown): void {
+        throw new Error("Function not implemented.");
+      }}
+      outsideCurrentMonth={false}
+      isFirstVisibleCell={false}
+      isLastVisibleCell={false}
+      {...otherProps}
+      className={className}
+      day={day}
+    />
+  );
 };
 
 function fakeFetch(date: Dayjs, { signal }: { signal: AbortSignal }) {
@@ -75,18 +83,6 @@ function Day(props: PickersDayProps<Dayjs> & { selectedDay?: Dayjs | null }) {
     />
   );
 }
-// const getWeekNumber = (date: Dayjs) => {
-//   const startOfYear = date.startOf("year").startOf("week");
-//   const diff = date.diff(startOfYear, "day");
-//   const week = Math.ceil((diff + startOfYear.day()) / 7);
-//   return week;
-// };
-const getWeekNumber = (date: Dayjs) => {
-  const startOfYear = date.startOf("year").startOf("week");
-  const diff = date.diff(startOfYear, "day");
-  const week = Math.ceil((diff + startOfYear.day()) / 7);
-  return week;
-};
 
 function CombinedDay(
   props: PickersDayProps<Dayjs> & {
@@ -100,13 +96,9 @@ function CombinedDay(
     !props.outsideCurrentMonth &&
     (highlightedDays.indexOf(props.day.date()) > -1 ||
       (selectedDay && props.day.isSame(selectedDay, "day")));
-  const weekNumber = getWeekNumber(props.day);
-
-  const isWeekStart = props.day.day() === 0;
 
   return (
     <div className={styles.day}>
-      {isWeekStart && <div className={styles.weekNumber}> {weekNumber}</div>}
       <Badge
         key={props.day.toString()}
         overlap="circular"
@@ -118,26 +110,13 @@ function CombinedDay(
     </div>
   );
 }
-const renderWeekday = (dayOfWeek: number) => {
-  const dayOfWeekString = dayjs().day(dayOfWeek).format("ddd");
-  return (
-    <span aria-label={dayOfWeekString} role="columnheader">
-      {dayOfWeek === 0 ? "WK" : dayOfWeekString}
-    </span>
-  );
-};
 
 export default function CustomDay() {
   const [value, setValue] = useState<Dayjs | null>(dayjs());
   const [highlightedDays, setHighlightedDays] = React.useState([1, 2, 1]);
   const requestAbortController = React.useRef<AbortController | null>(null);
-  const [views, setViews] = React.useState<Array<"month" | "day">>([
-    "month",
-    "day",
-  ]);
-  const toggleViews = () => {
-    setViews(views.includes("day") ? ["month"] : ["month", "day"]);
-  };
+
+  const [viewDate, setViewDate] = useState<Dayjs>(dayjs());
 
   const fetchHighlightedDays = (date: Dayjs | null) => {
     const controller = new AbortController();
@@ -156,11 +135,25 @@ export default function CustomDay() {
 
     requestAbortController.current = controller;
   };
-  // useEffect(() => {
-  //   fetchHighlightedDays(value);
-  //   return () => requestAbortController.current?.abort();
-  // }, [value]);
 
+  useEffect(() => {
+    const controller = new AbortController();
+    requestAbortController.current = controller;
+
+    fakeFetch(viewDate, controller)
+      .then((result) => {
+        setHighlightedDays(result.daysToHighlight);
+      })
+      .catch((err) => {
+        if (err.name !== "AbortError") {
+          console.error(err);
+        }
+      });
+
+    return () => {
+      controller.abort();
+    };
+  }, [viewDate]);
   const handleMonthChange = (date: Dayjs) => {
     if (requestAbortController.current) {
       requestAbortController.current.abort();
@@ -170,35 +163,42 @@ export default function CustomDay() {
     setValue(date.startOf("month"));
     fetchHighlightedDays(date);
   };
+  const handleTodayClick = () => {
+    setValue(dayjs());
+  };
 
   return (
     <div>
-      <div className="App">
-        <Button onClick={toggleViews}>Month</Button>
-
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateCalendar
-            value={value}
-            onChange={(newValue) => setValue(newValue ? newValue : null)}
-            onMonthChange={handleMonthChange}
-            renderLoading={() => <DayCalendarSkeleton />}
-            slots={{
-              day: CombinedDay,
-            }}
-            views={views}
-            // renderLoading={() => <div>Loading...</div>}
-            slotProps={{
-              day: {
-                highlightedDays,
-                selectedDay: value,
-              } as any,
-            }}
-            // renderWeekday={renderWeekday}
-          />
-
-          {/* <DayCalendarSkeleton /> */}
-        </LocalizationProvider>
-      </div>
+      <LocalizationProvider
+        dateAdapter={AdapterDayjs}
+        localeText={{
+          calendarWeekNumberHeaderText: "WK",
+          calendarWeekNumberText: (weekNumber) => `${weekNumber}`,
+        }}>
+        <Button
+          variant="outlined"
+          onClick={() => setValue(dayjs())}
+          style={{ marginBottom: "10px" }}>
+          Today
+        </Button>
+        <DateCalendar
+          displayWeekNumber
+          value={value}
+          onChange={(newValue) => setValue(newValue ? newValue : null)}
+          onMonthChange={handleMonthChange}
+          renderLoading={() => <DayCalendarSkeleton />}
+          slots={{
+            day: CombinedDay,
+          }}
+          views={["month", "day"]}
+          slotProps={{
+            day: {
+              highlightedDays,
+              selectedDay: value,
+            } as any,
+          }}
+        />
+      </LocalizationProvider>
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { NavbarBrand } from "react-bootstrap";
 import styles from "../styles/Home.module.css";
 import ListParam from "../pages/param/ListParam";
 import CalendarEventList from "../components/ListofEvent";
+
 const events: ListParam[] = [
   {
     id: 1,
@@ -18,6 +19,11 @@ const events: ListParam[] = [
     end: new Date("2023-04-29T11:00:00"),
   },
 ];
+const eventList = events.map((event) => ({
+  date: new Date(event.start),
+  title: event.title,
+  id: event.id,
+}));
 
 const Home: React.FC = () => {
   return (
@@ -28,6 +34,7 @@ const Home: React.FC = () => {
           <br />
         </NavbarBrand>
         <CustomDay />
+
         <hr />
         <CalendarEventList events={events} />
       </div>
