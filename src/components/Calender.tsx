@@ -9,6 +9,8 @@ import Badge from "@mui/material/Badge";
 import { DayCalendarSkeleton } from "@mui/x-date-pickers";
 import styles from "../styles/CustomPickersDay.module.css";
 import stylofcustomdate from "../styles/CustomDay.module.css";
+import { Button } from "react-bootstrap";
+
 interface CustomPickerDayProps extends PickersDayProps<Dayjs> {
   dayIsBetween: boolean;
   isFirstDay: boolean;
@@ -116,14 +118,30 @@ function CombinedDay(
     </div>
   );
 }
+const renderWeekday = (dayOfWeek: number) => {
+  const dayOfWeekString = dayjs().day(dayOfWeek).format("ddd");
+  return (
+    <span aria-label={dayOfWeekString} role="columnheader">
+      {dayOfWeek === 0 ? "WK" : dayOfWeekString}
+    </span>
+  );
+};
 
 export default function CustomDay() {
   const [value, setValue] = useState<Dayjs | null>(dayjs());
   const [highlightedDays, setHighlightedDays] = React.useState([1, 2, 1]);
   const requestAbortController = React.useRef<AbortController | null>(null);
+  const [views, setViews] = React.useState<Array<"month" | "day">>([
+    "month",
+    "day",
+  ]);
+  const toggleViews = () => {
+    setViews(views.includes("day") ? ["month"] : ["month", "day"]);
+  };
 
   const fetchHighlightedDays = (date: Dayjs | null) => {
     const controller = new AbortController();
+
     fakeFetch(date || dayjs(), {
       signal: controller.signal,
     })
@@ -149,15 +167,17 @@ export default function CustomDay() {
     }
 
     setHighlightedDays([]);
+    setValue(date.startOf("month"));
     fetchHighlightedDays(date);
   };
 
   return (
     <div>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <div className={styles.container}>
-          <div className={styles.columnHeader}>wk</div>
-          <DateCalendar<Dayjs>
+      <div className="App">
+        <Button onClick={toggleViews}>Month</Button>
+
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DateCalendar
             value={value}
             onChange={(newValue) => setValue(newValue ? newValue : null)}
             onMonthChange={handleMonthChange}
@@ -165,17 +185,20 @@ export default function CustomDay() {
             slots={{
               day: CombinedDay,
             }}
-            views={["month", "day"]}
+            views={views}
+            // renderLoading={() => <div>Loading...</div>}
             slotProps={{
               day: {
                 highlightedDays,
                 selectedDay: value,
               } as any,
             }}
+            // renderWeekday={renderWeekday}
           />
+
           {/* <DayCalendarSkeleton /> */}
-        </div>
-      </LocalizationProvider>
+        </LocalizationProvider>
+      </div>
     </div>
   );
 }
